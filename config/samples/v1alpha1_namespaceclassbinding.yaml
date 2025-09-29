@@ -1,0 +1,10 @@
+# Example NamespaceClassBinding resource
+# Note: This is typically created automatically by the namespace controller
+# when a namespace has the namespaceclass.akuity.io/name label
+apiVersion: akuity.io/v1alpha1
+kind: NamespaceClassBinding
+metadata:
+  name: self
+  namespace: example-namespace
+spec:
+  className: public-network

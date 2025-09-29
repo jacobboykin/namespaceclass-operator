@@ -1,0 +1,33 @@
+# This rule is not used by the project namespaceclass-operator itself.
+# It is provided to allow the cluster admin to help manage permissions for users.
+#
+# Grants read and write access to NamespaceClassBinding resources.
+# This role is intended for users who need to manage namespace bindings
+# within their namespaces. It allows for creating, updating, and deleting bindings.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: namespaceclass-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: namespaceclassbinding-editor-role
+rules:
+- apiGroups:
+  - akuity.io
+  resources:
+  - namespaceclassbindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - akuity.io
+  resources:
+  - namespaceclassbindings/status
+  verbs:
+  - get

@@ -1,0 +1,6 @@
+## Append samples of your project ##
+resources:
+- v1alpha1_namespaceclass.yaml
+- v1alpha1_namespaceclassbinding.yaml
+- v1_namespace.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

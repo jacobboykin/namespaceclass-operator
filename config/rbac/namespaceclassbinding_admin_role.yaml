@@ -1,0 +1,42 @@
+# This rule is not used by the project namespaceclass-operator itself.
+# It is provided to allow the cluster admin to help manage permissions for users.
+#
+# Grants full admin access to NamespaceClassBinding resources.
+# This role is intended for administrators who need complete control over namespace bindings,
+# including managing finalizers and status updates.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: namespaceclass-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: namespaceclassbinding-admin-role
+rules:
+- apiGroups:
+  - akuity.io
+  resources:
+  - namespaceclassbindings
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - akuity.io
+  resources:
+  - namespaceclassbindings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - akuity.io
+  resources:
+  - namespaceclassbindings/finalizers
+  verbs:
+  - update

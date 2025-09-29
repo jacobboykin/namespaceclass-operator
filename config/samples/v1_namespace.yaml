@@ -1,0 +1,15 @@
+# Example namespace that uses the public-network NamespaceClass
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web-portal
+  labels:
+    namespaceclass.akuity.io/name: public-network
+---
+# Example namespace that uses the internal-network NamespaceClass
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: internal-api
+  labels:
+    namespaceclass.akuity.io/name: internal-network
