@@ -143,6 +143,10 @@ spec:
                   that was last processed
                 format: int64
                 type: integer
+              observedClassName:
+                description: ObservedClassName is the name of the NamespaceClass that
+                  was last processed
+                type: string
             type: object
         required:
         - spec

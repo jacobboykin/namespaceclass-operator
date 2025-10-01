@@ -90,6 +90,8 @@ func (r *NamespaceClassBindingReconciler) Reconcile(ctx context.Context, req ctr
 		if err := r.handleClassSwitch(ctx, binding, class); err != nil {
 			return ctrl.Result{}, err
 		}
+		// After deleting old resources, always apply new resources
+		return r.handleNamespaceClassUpdate(ctx, req, binding, class)
 	}
 
 	// Check if we need to update based on generation
@@ -117,7 +119,7 @@ func (r *NamespaceClassBindingReconciler) SetupWithManager(mgr ctrl.Manager) err
 	// Trigger reconciliation of bindings when their referenced class changes
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 8,
+			MaxConcurrentReconciles: 4,
 		}).
 		For(&akuityv1alpha1.NamespaceClassBinding{}).
 		Watches(

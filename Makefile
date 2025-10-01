@@ -117,6 +117,30 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default > dist/install.yaml
 
+##@ E2E Testing
+
+KIND_CLUSTER_NAME ?= namespaceclass-operator-e2e
+
+.PHONY: test-e2e
+test-e2e: ## Run e2e tests.
+	go test ./test/e2e/... -v -timeout 10m
+
+.PHONY: kind-create
+kind-create: ## Create a kind cluster for testing.
+	$(KIND) create cluster --name $(KIND_CLUSTER_NAME)
+
+.PHONY: kind-delete
+kind-delete: ## Delete the kind cluster.
+	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
+
+.PHONY: kind-setup
+kind-setup: kind-create docker-build ## Create kind cluster, build and load docker image, deploy operator, and wait for readiness.
+	$(KIND) load docker-image ${IMG} --name $(KIND_CLUSTER_NAME)
+	$(MAKE) deploy
+	@echo "Waiting for operator deployment to be ready..."
+	$(KUBECTL) wait --for=condition=available --timeout=300s deployment/namespaceclass-operator-controller-manager -n namespaceclass-operator-system || true
+	@echo "Kind cluster setup complete!"
+
 ##@ Deployment
 
 ifndef ignore-not-found

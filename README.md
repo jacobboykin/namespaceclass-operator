@@ -12,4 +12,3 @@ Things that could be added in the future to improve this project:
 * Better CRD validation to ensure cluster-scoped resources are not included in NamespaceClass definitions
 * Drift synchronization options to ensure resources remain in sync with NamespaceClass definitions
 * Cleaner code organization and modularization for easier maintenance
-* E2E tests using KiND

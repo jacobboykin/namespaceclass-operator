@@ -286,15 +286,15 @@ func TestNamespaceClassBindingReconciler_HelperFunctions(t *testing.T) {
 		tests := []struct {
 			name                string
 			bindingClassName    string
+			observedClassName   string
 			classNameInClass    string
 			hasAppliedResources bool
-			observedGen         int64
 			expectSwitch        bool
 		}{
-			{"no switch same class", "class-a", "class-a", true, 1, false},
-			{"switch different class", "class-b", "class-a", true, 1, true},
-			{"no switch no resources", "class-b", "class-a", false, 1, false},
-			{"no switch no observed gen", "class-b", "class-a", true, 0, false},
+			{"no switch same class", "class-a", "class-a", "class-a", true, false},
+			{"switch different class", "class-b", "class-a", "class-b", true, true},
+			{"no switch no resources", "class-b", "class-a", "class-b", false, false},
+			{"no switch no observed class name", "class-b", "", "class-b", true, false},
 		}
 
 		for _, tt := range tests {
@@ -304,7 +304,7 @@ func TestNamespaceClassBindingReconciler_HelperFunctions(t *testing.T) {
 						ClassName: tt.bindingClassName,
 					},
 					Status: akuityv1alpha1.NamespaceClassBindingStatus{
-						ObservedClassGeneration: tt.observedGen,
+						ObservedClassName: tt.observedClassName,
 					},
 				}
 				if tt.hasAppliedResources {
