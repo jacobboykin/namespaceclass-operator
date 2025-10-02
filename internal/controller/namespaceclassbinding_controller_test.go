@@ -289,51 +289,6 @@ func TestNamespaceClassBindingReconciler_HelperFunctions(t *testing.T) {
 		}
 	})
 
-	t.Run("isClassSwitch", func(t *testing.T) {
-		reconciler := &NamespaceClassBindingReconciler{}
-
-		tests := []struct {
-			name                string
-			bindingClassName    string
-			observedClassName   string
-			classNameInClass    string
-			hasAppliedResources bool
-			expectSwitch        bool
-		}{
-			{"no switch same class", "class-a", "class-a", "class-a", true, false},
-			{"switch different class", "class-b", "class-a", "class-b", true, true},
-			{"no switch no resources", "class-b", "class-a", "class-b", false, false},
-			{"no switch no observed class name", "class-b", "", "class-b", true, false},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				binding := &akuityv1alpha1.NamespaceClassBinding{
-					Spec: akuityv1alpha1.NamespaceClassBindingSpec{
-						ClassName: tt.bindingClassName,
-					},
-					Status: akuityv1alpha1.NamespaceClassBindingStatus{
-						ObservedClassName: tt.observedClassName,
-					},
-				}
-				if tt.hasAppliedResources {
-					binding.Status.AppliedResources = []akuityv1alpha1.AppliedResource{
-						{APIVersion: "v1", Kind: "ConfigMap", Name: "test"},
-					}
-				}
-
-				class := &akuityv1alpha1.NamespaceClass{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: tt.classNameInClass,
-					},
-				}
-
-				result := reconciler.isClassSwitch(binding, class)
-				assert.Equal(t, tt.expectSwitch, result)
-			})
-		}
-	})
-
 	t.Run("pruneRemovedResources", func(t *testing.T) {
 		ctx := context.Background()
 		recorder := record.NewFakeRecorder(10)
@@ -446,59 +401,6 @@ func TestNamespaceClassBindingReconciler_HandlerMethods(t *testing.T) {
 		// Verify binding was deleted
 		err = fakeClient.Get(ctx, types.NamespacedName{Name: "test-binding", Namespace: "test-ns"}, binding)
 		assert.True(t, errors.IsNotFound(err))
-	})
-
-	t.Run("handleClassSwitch", func(t *testing.T) {
-		ctx := context.Background()
-		recorder := record.NewFakeRecorder(10)
-
-		binding := &akuityv1alpha1.NamespaceClassBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-binding",
-				Namespace: "test-ns",
-			},
-			Spec: akuityv1alpha1.NamespaceClassBindingSpec{
-				ClassName: "new-class",
-			},
-			Status: akuityv1alpha1.NamespaceClassBindingStatus{
-				ObservedClassGeneration: 1,
-				AppliedResources: []akuityv1alpha1.AppliedResource{
-					{APIVersion: "v1", Kind: "ConfigMap", Name: "old-config"},
-				},
-			},
-		}
-
-		class := &akuityv1alpha1.NamespaceClass{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "new-class",
-			},
-			Spec: akuityv1alpha1.NamespaceClassSpec{
-				Resources: []runtime.RawExtension{},
-			},
-		}
-
-		fakeClient := fake.NewClientBuilder().
-			WithScheme(scheme).
-			WithObjects(binding, class).
-			Build()
-
-		reconciler := &NamespaceClassBindingReconciler{
-			Client:   fakeClient,
-			Scheme:   scheme,
-			Recorder: recorder,
-		}
-
-		err := reconciler.handleClassSwitch(ctx, binding, class)
-		assert.NoError(t, err)
-
-		// handleClassSwitch doesn't record events, just cleans up old resources
-		// Verify no event was recorded
-		select {
-		case event := <-recorder.Events:
-			t.Errorf("unexpected event: %s", event)
-		default:
-			// Expected no event
-		}
 	})
 
 	t.Run("findBindingsForClass", func(t *testing.T) {

@@ -71,21 +71,6 @@ func (r *NamespaceClassBindingReconciler) handleNamespaceClassDeleted(ctx contex
 	return ctrl.Result{}, nil
 }
 
-// handleClassSwitch handles switching from one NamespaceClass to another
-func (r *NamespaceClassBindingReconciler) handleClassSwitch(ctx context.Context,
-	binding *akuityv1alpha1.NamespaceClassBinding, class *akuityv1alpha1.NamespaceClass) error {
-	logger := log.FromContext(ctx)
-	logger.Info("detected class switch", "from", class.Name, "to", binding.Spec.ClassName)
-
-	// Delete old resources before applying new ones
-	if err := r.deleteOldResources(ctx, binding); err != nil {
-		logger.Error(err, "failed to delete old resources during class switch")
-		return err
-	}
-
-	return nil
-}
-
 // handleNamespaceClassUpdate handles applying updates from a NamespaceClass
 func (r *NamespaceClassBindingReconciler) handleNamespaceClassUpdate(ctx context.Context, req ctrl.Request,
 	binding *akuityv1alpha1.NamespaceClassBinding, class *akuityv1alpha1.NamespaceClass) (ctrl.Result, error) {
@@ -125,14 +110,6 @@ func (r *NamespaceClassBindingReconciler) handleNamespaceClassUpdate(ctx context
 func (r *NamespaceClassBindingReconciler) needsUpdate(binding *akuityv1alpha1.NamespaceClassBinding,
 	class *akuityv1alpha1.NamespaceClass) bool {
 	return binding.Status.ObservedClassGeneration != class.Generation ||
-		binding.Status.ObservedClassName != binding.Spec.ClassName
-}
-
-// isClassSwitch detects if the binding is switching to a different NamespaceClass
-func (r *NamespaceClassBindingReconciler) isClassSwitch(binding *akuityv1alpha1.NamespaceClassBinding,
-	class *akuityv1alpha1.NamespaceClass) bool {
-	return len(binding.Status.AppliedResources) > 0 &&
-		binding.Status.ObservedClassName != "" &&
 		binding.Status.ObservedClassName != binding.Spec.ClassName
 }
 
