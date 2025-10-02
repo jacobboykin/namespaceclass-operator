@@ -106,6 +106,7 @@ func (r *NamespaceClassBindingReconciler) handleNamespaceClassUpdate(ctx context
 
 	// Update the binding status
 	if err := r.patchBindingStatus(ctx, req.NamespacedName, func(b *akuityv1alpha1.NamespaceClassBinding) {
+		b.Status.ObservedClassName = class.Name
 		b.Status.ObservedClassGeneration = class.Generation
 		b.Status.AppliedResources = appliedResources
 	}); err != nil {
@@ -123,15 +124,16 @@ func (r *NamespaceClassBindingReconciler) handleNamespaceClassUpdate(ctx context
 // needsUpdate determines if the binding needs to be updated
 func (r *NamespaceClassBindingReconciler) needsUpdate(binding *akuityv1alpha1.NamespaceClassBinding,
 	class *akuityv1alpha1.NamespaceClass) bool {
-	return binding.Status.ObservedClassGeneration != class.Generation
+	return binding.Status.ObservedClassGeneration != class.Generation ||
+		binding.Status.ObservedClassName != binding.Spec.ClassName
 }
 
 // isClassSwitch detects if the binding is switching to a different NamespaceClass
 func (r *NamespaceClassBindingReconciler) isClassSwitch(binding *akuityv1alpha1.NamespaceClassBinding,
 	class *akuityv1alpha1.NamespaceClass) bool {
 	return len(binding.Status.AppliedResources) > 0 &&
-		binding.Status.ObservedClassGeneration > 0 &&
-		class.Name != binding.Spec.ClassName
+		binding.Status.ObservedClassName != "" &&
+		binding.Status.ObservedClassName != binding.Spec.ClassName
 }
 
 // pruneRemovedResources removes resources that are no longer in the desired state

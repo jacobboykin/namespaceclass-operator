@@ -85,14 +85,7 @@ func (r *NamespaceClassBindingReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, err
 	}
 
-	// Handle class switching if detected
-	if r.isClassSwitch(binding, class) {
-		if err := r.handleClassSwitch(ctx, binding, class); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
-	// Check if we need to update based on generation
+	// Check if we need to update based on generation or class name change
 	if r.needsUpdate(binding, class) {
 		return r.handleNamespaceClassUpdate(ctx, req, binding, class)
 	}

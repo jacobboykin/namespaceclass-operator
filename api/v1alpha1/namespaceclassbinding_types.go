@@ -37,6 +37,10 @@ type NamespaceClassBindingSpec struct {
 
 // NamespaceClassBindingStatus defines the observed state of NamespaceClassBinding.
 type NamespaceClassBindingStatus struct {
+	// ObservedClassName is the name of the NamespaceClass that was last processed
+	// +optional
+	ObservedClassName string `json:"observedClassName,omitempty"`
+
 	// ObservedClassGeneration is the generation of the NamespaceClass that was last processed
 	// +optional
 	ObservedClassGeneration int64 `json:"observedClassGeneration,omitempty"`
